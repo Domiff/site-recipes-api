@@ -1,10 +1,7 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Table
-from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import Column, ForeignKey, String, Table
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-
-class Base(DeclarativeBase):
-    pass
-
+from src.core.database import Base
 
 recipe_category = Table(
     "site_recipes_app_recipe_category",
@@ -24,12 +21,8 @@ class Recipe(Base):
     ingredients: Mapped[str] = mapped_column(String)
     time_cooking: Mapped[str] = mapped_column(String)
 
-    author_id: Mapped[int] = mapped_column(Integer)
-
     categories: Mapped[list["Category"]] = relationship(
-        "Category",
-        secondary=recipe_category,
-        back_populates="recipes"
+        "Category", secondary=recipe_category, back_populates="recipes"
     )
 
 
@@ -40,7 +33,5 @@ class Category(Base):
     name: Mapped[str] = mapped_column(String)
 
     recipes: Mapped[list["Recipe"]] = relationship(
-        "Recipe",
-        secondary=recipe_category,
-        back_populates="categories"
+        "Recipe", secondary=recipe_category, back_populates="categories"
     )
