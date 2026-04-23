@@ -81,3 +81,7 @@ def configure_logging() -> None:
 
     for logger_name in ["uvicorn.access"]:
         logging.getLogger(logger_name).setLevel(logging.WARNING)
+
+
+def get_logger(name: str):
+    return structlog.get_logger(name)

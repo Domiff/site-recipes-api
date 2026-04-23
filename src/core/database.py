@@ -1,20 +1,26 @@
 from collections.abc import AsyncGenerator  # noqa
 from typing import Annotated
 
-import structlog
 from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
 
 from src.core.config import settings
+from src.core.utils import to_snake_plural
+from src.core.logging_app import get_logger
 
-
-logger = structlog.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class Base(DeclarativeBase):
-    pass
+    __abstract__ = True
+
+    @declared_attr.directive
+    def __tablename__(cls) -> str:
+        return to_snake_plural(cls.__name__)
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
 
 url = settings.DB_URL

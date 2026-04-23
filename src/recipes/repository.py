@@ -1,12 +1,13 @@
-import structlog
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload, selectinload
 
 from src.core.database import SessionDep  # noqa
 from src.recipes.models import Category, Recipe
 from src.recipes.schemas import RecipeData, RecipeRequest, RecipeResponse
+from src.core.logging_app import get_logger
 
-logger = structlog.get_logger(__name__)
+
+logger = get_logger(__name__)
 
 
 class Repository:

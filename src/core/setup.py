@@ -1,17 +1,16 @@
 from collections.abc import AsyncGenerator  # noqa
 from contextlib import asynccontextmanager
 
-import structlog
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
 from src.core.database import ping_database
-from src.core.logging_app import configure_logging
+from src.core.logging_app import configure_logging, get_logger
 from src.recipes.router import router
 
 
-logger = structlog.get_logger(__name__)
+logger = get_logger(__name__)
 
 
 @asynccontextmanager
