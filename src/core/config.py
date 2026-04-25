@@ -10,29 +10,55 @@ BASE_DIR: Path = Path(__file__).parent.parent.parent
 
 
 class AppSettings(BaseSettings):
-    DB_URL: str = Field(default="sqlite+aisqlite:///db.sqlite3")
-
     IS_DEBUG: bool = Field(default=True)
     IS_DOCKERIZED: bool = Field(default=False)
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore"
+    )
 
 
-class CsrfSettings(BaseSettings):
-    cookie_key: str = "csrf_token"
-    secret_key: str = secrets.token_urlsafe(50)
-    cookie_samesite: Literal["lax", "strict", "none"] = "lax"
-    cookie_secure: bool = True
-    httponly: bool = True
+class DBSettings(AppSettings):
+    DB_URL: str = Field(default="sqlite+aisqlite:///db.sqlite3")
 
 
-class Settings(BaseSettings):
+class SessionSettings(AppSettings):
+    COOKIE_KEY: str = "csrf_token"
+    SECRET_KEY: str = secrets.token_urlsafe(50)
+    COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
+    COOKIE_SECURE: bool = True
+    HTTPONLY: bool = True
+    SESSION_COOKIE_MAX_AGE: int = 60 * 60 * 24
+
+
+class RedisSettings(AppSettings):
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_DB: int = 0
+    CONNECTION_POOL_MAXSIZE: int = 10
+    EXPIRE: int = 60 * 60 * 24
+
+    def model_post_init(self, __context) -> None:
+        object.__setattr__(
+            self, "REDIS_HOST", "redis" if self.IS_DOCKERIZED else "localhost"
+        )
+        object.__setattr__(
+            self,
+            "REDIS_URL",
+            f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/{self.REDIS_DB}",
+        )
+
+
+class Settings(AppSettings):
     app_settings: AppSettings = AppSettings()
-    csrf_settings: CsrfSettings = CsrfSettings()
+    db_settings: DBSettings = DBSettings()
+    session_settings: SessionSettings = SessionSettings()
+    redis_settings: RedisSettings = RedisSettings()
 
 
 settings = Settings()
 
+
 @CsrfProtect.load_config
 def get_csrf_config():
-    return settings.csrf_settings
+    return settings.session_settings

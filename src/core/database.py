@@ -23,7 +23,7 @@ class Base(DeclarativeBase):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
 
-url = settings.app_settings.DB_URL
+url = settings.db_settings.DB_URL
 engine = create_async_engine(url)
 new_session = async_sessionmaker(engine, expire_on_commit=False)
 
