@@ -9,6 +9,7 @@ from alembic import context
 from src.core.config import settings
 from src.core.database import Base
 from src.recipes.models import Recipe  # noqa
+from src.auth.models import User  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -30,7 +31,7 @@ target_metadata = Base.metadata
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
 
-config.set_main_option("sqlalchemy.url", settings.DB_URL)
+config.set_main_option("sqlalchemy.url", settings.db_settings.DB_URL)
 
 
 def run_migrations_offline() -> None:
