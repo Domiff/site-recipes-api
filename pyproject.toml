@@ -19,6 +19,8 @@ structlog = "^25.5.0"
 python-json-logger = "^4.1.0"
 uvloop = "^0.22.1"
 fastapi-csrf-protect = "^1.0.7"
+bcrypt = "^5.0.0"
+redis = "^7.4.0"
 
 
 [tool.ruff]
