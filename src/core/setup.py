@@ -6,8 +6,10 @@ from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
 from src.core.database import ping_database
+from src.core.errors import setup_errors
 from src.core.logging_app import configure_logging, get_logger
-from src.recipes.router import router
+from src.recipes.router import router as recipes_router
+from src.auth.router import router as auth_router
 
 
 logger = get_logger(__name__)
@@ -16,8 +18,8 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     params = {
-        "is_debug": settings.IS_DEBUG,
-        "is_dockerized": settings.IS_DOCKERIZED,
+        "is_debug": settings.app_settings.IS_DEBUG,
+        "is_dockerized": settings.app_settings.IS_DOCKERIZED,
     }
     logger.info("Starting application", **params)
     logger.info("Application started")
@@ -36,13 +38,15 @@ def create_app() -> FastAPI:
         title="Site Recipes",
         version="1",
         lifespan=lifespan,
-        openapi_url="/openapi.json" if settings.IS_DEBUG else None,
+        openapi_url="/openapi.json" if settings.app_settings.IS_DEBUG else None,
     )
 
     setup_middlewares(app)
     setup_healthcheck(app)
+    setup_errors(app)
 
-    app.include_router(router, tags=["recipes"])
+    app.include_router(recipes_router, tags=["recipes"])
+    app.include_router(auth_router, tags=["auth"])
     logger.info("Application routes configured")
 
     return app

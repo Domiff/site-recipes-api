@@ -40,7 +40,7 @@ def configure_logging() -> None:
         structlog.processors.format_exc_info,
     ]
 
-    if settings.IS_DEBUG:
+    if settings.app_settings.IS_DEBUG:
         processors.append(structlog.dev.ConsoleRenderer(colors=True))
         formatter = None
     else:
@@ -61,7 +61,7 @@ def configure_logging() -> None:
     handlers: list[logging.Handler] = [handler]
 
     try:
-        if settings.IS_DOCKERIZED:
+        if settings.app_settings.IS_DOCKERIZED:
             log_dir = f"{BASE_DIR}/logs"
             os.makedirs(log_dir, exist_ok=True)
             file_handler = logging.handlers.RotatingFileHandler(
@@ -76,7 +76,7 @@ def configure_logging() -> None:
     logging.basicConfig(
         level=getattr(logging, LOG_LEVEL, logging.INFO),
         handlers=handlers,
-        format="%(message)s" if settings.IS_DEBUG else None,
+        format="%(message)s" if settings.app_settings.IS_DEBUG else None,
     )
 
     for logger_name in ["uvicorn.access"]:
