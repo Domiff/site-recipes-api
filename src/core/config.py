@@ -19,7 +19,22 @@ class AppSettings(BaseSettings):
 
 
 class DBSettings(AppSettings):
-    DB_URL: str = Field(default="sqlite+aisqlite:///db.sqlite3")
+    SQLITE_URL: str = "sqlite+aisqlite:///db.sqlite3"
+
+    POSTGRES_DB: str = "POSTGRES_DB"
+    POSTGRES_USER: str = "POSTGRES_USER"
+    POSTGRES_PASSWORD: str = "POSTGRES_PASSWORD"
+    POSTGRES_HOST: str = "localhost"
+    POSTGRES_PORT: int = 5432
+
+    def get_pg_url(self) -> str:
+        return (f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+                f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}")
+
+    def model_post_init(self, __context) -> None:
+        object.__setattr__(self,
+            "DB_URL", self.get_pg_url() if self.IS_DOCKERIZED else self.SQLITE_URL,
+        )
 
 
 class SessionSettings(AppSettings):
