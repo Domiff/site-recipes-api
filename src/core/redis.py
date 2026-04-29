@@ -21,14 +21,7 @@ def get_redis() -> Redis:
 
 class RedisClient:
     def __init__(self):
-        self._redis = get_redis()
-
-    async def __aenter__(self):
-        self.redis = self._redis
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.redis.aclose()
+        self.redis = get_redis()
 
     async def set(self, key: str, value) -> bool:
         try:

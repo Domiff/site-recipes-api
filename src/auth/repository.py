@@ -12,17 +12,12 @@ from src.core.logging_app import get_logger
 logger = get_logger(__name__)
 
 
-class Auth:
+class BaseAuth:
     def __init__(self, session: AsyncSession):
-        self._session = session
+        self.session = session
 
-    async def __aenter__(self):
-        self.session = self._session
-        return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        await self.session.close()
-
+class AuthUser(BaseAuth):
     async def create_user(self, credentials: CredentialsSchema) -> User:
         hashed_password = hash_password(credentials.password)
         try:
@@ -56,9 +51,11 @@ class Auth:
             raise DoesNotExist("User not found")
         return user
 
-    async def authenticate(self, credentials: CredentialsSchema, user_model: User = None) -> str:
+    async def authenticate(self, credentials: CredentialsSchema = None, user_model: User = None) -> str:
         if user_model:
             return generate_session_id(32)
+        if not credentials:
+            raise IncorrectCredentials("Incorrect credentials")
         if credentials.email:
             user = await self.get_user_by_email(credentials.email)
         elif credentials.username:
