@@ -1,10 +1,13 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.models import User
+from src.auth.models import User, Session
 from src.auth.schemas import CredentialsSchema, UserSchema
 from src.auth.utils import hash_password, verify_password, generate_session_id
+from src.core.config import settings
 from src.core.exceptions import AlreadyExists, IncorrectCredentials, DoesNotExist
 from src.core.logging_app import get_logger
 
@@ -67,3 +70,30 @@ class AuthUser(BaseAuth):
             logger.error("Incorrect password")
             raise IncorrectCredentials("Incorrect credentials")
         return generate_session_id(32)
+
+
+class AuthSession(BaseAuth):
+    async def create_session(self, session_key, session_data) -> Session:
+        session = Session(
+            session_key=session_key,
+            session_data=session_data,
+            expire_date=settings.session_settings.SESSION_MAX_AGE,
+        )
+        self.session.add(session)
+        await self.session.commit()
+        logger.info("Session created")
+        return session
+
+    async def delete_session(self, session_key) -> bool:
+        await self.session.delete(session_key)
+        await self.session.commit()
+        logger.info("Session deleted")
+        return True
+
+    async def update_session(self, session_key) -> bool:
+        session = select(Session).where(session_key=session_key)
+        session.expire_date = datetime.now() + timedelta(seconds=settings.session_settings.SESSION_MAX_AGE)
+        self.session.add(session)
+        await self.session.commit()
+        logger.info("Session updated")
+        return True

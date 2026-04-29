@@ -30,7 +30,7 @@ async def registration(credentials: CredentialsSchema, session: SessionDep) -> J
         key="session_id",
         value=session_id,
         httponly=True,
-        max_age=settings.session_settings.SESSION_COOKIE_MAX_AGE,
+        max_age=settings.session_settings.SESSION_MAX_AGE,
         secure=True,
         samesite="lax",
     )
@@ -45,7 +45,7 @@ async def login(credentials: CredentialsSchema, session: SessionDep, cookie_sess
         key="session_id",
         value=session_id,
         httponly=True,
-        max_age=settings.session_settings.SESSION_COOKIE_MAX_AGE,
+        max_age=settings.session_settings.SESSION_MAX_AGE,
         secure=True,
         samesite="lax",
     )
@@ -53,8 +53,8 @@ async def login(credentials: CredentialsSchema, session: SessionDep, cookie_sess
 
 
 @router.post("/logout")
-async def logout(cookie_session_id: str) -> Response:
+async def logout(cookie_session_id: str, session: SessionDep) -> Response:
     response = JSONResponse(content={"detail": "Logged out successfully"}, status_code=status.HTTP_204_NO_CONTENT)
-    await logout_user(cookie_session_id)
+    await logout_user(cookie_session_id, session)
     response.delete_cookie("session_id")
     return response

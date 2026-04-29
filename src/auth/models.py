@@ -1,4 +1,6 @@
-from sqlalchemy import String
+from datetime import datetime
+
+from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.database import Base
@@ -14,3 +16,12 @@ class User(Base):
 
     def __repr__(self) -> str:
         return f"<User {self.username}>"
+
+
+class Session(Base):
+    session_key: Mapped[str] = mapped_column(String(200), unique=True)
+    session_data: Mapped[str] = mapped_column(String(200))
+    expire_date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+    def __repr__(self) -> str:
+        return f"<Session {self.session_key}>"

@@ -28,7 +28,7 @@ class SessionSettings(AppSettings):
     COOKIE_SAMESITE: Literal["lax", "strict", "none"] = "lax"
     COOKIE_SECURE: bool = True
     HTTPONLY: bool = True
-    SESSION_COOKIE_MAX_AGE: int = 60 * 60 * 24
+    SESSION_MAX_AGE: int = 60 * 60 * 24 * 14
 
 
 class RedisSettings(AppSettings):
@@ -36,7 +36,7 @@ class RedisSettings(AppSettings):
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     CONNECTION_POOL_MAXSIZE: int = 10
-    EXPIRE: int = 60 * 60 * 24
+    EXPIRE: int = 60 * 60
 
     def model_post_init(self, __context) -> None:
         object.__setattr__(
