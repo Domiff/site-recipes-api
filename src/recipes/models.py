@@ -19,7 +19,10 @@ class Recipe(Base):
     time_cooking: Mapped[str] = mapped_column(String)
 
     categories: Mapped[list["Category"]] = relationship(
-        "Category", secondary=recipe_category, back_populates="recipes", lazy="selectin",
+        "Category",
+        secondary=recipe_category,
+        back_populates="recipes",
+        lazy="selectin",
     )
 
 
@@ -27,5 +30,8 @@ class Category(Base):
     name: Mapped[str] = mapped_column(String)
 
     recipes: Mapped[list["Recipe"]] = relationship(
-        "Recipe", secondary=recipe_category, back_populates="categories", lazy="selectin",
+        "Recipe",
+        secondary=recipe_category,
+        back_populates="categories",
+        lazy="selectin",
     )

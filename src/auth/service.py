@@ -8,6 +8,7 @@ from src.core.redis import RedisClient
 
 logger = get_logger(__name__)
 
+
 async def register_user(credentials: CredentialsSchema, session: AsyncSession) -> str:
     redis = RedisClient()
     auth_user = AuthUser(session=session)
@@ -19,7 +20,9 @@ async def register_user(credentials: CredentialsSchema, session: AsyncSession) -
     return session_id
 
 
-async def login_user(credentials: CredentialsSchema, session: AsyncSession, cookie_session_id) -> str:
+async def login_user(
+    credentials: CredentialsSchema, session: AsyncSession, cookie_session_id
+) -> str:
     redis = RedisClient()
     auth_user = AuthUser(session=session)
     auth_session = AuthSession(session=session)
@@ -28,7 +31,9 @@ async def login_user(credentials: CredentialsSchema, session: AsyncSession, cook
     await redis.expire(cookie_session_id)
     return session_id
 
+
 # TODO: add refresh, check for cache
+
 
 async def logout_user(cookie_session_id: str, session: AsyncSession) -> bool:
     redis = RedisClient()

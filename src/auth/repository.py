@@ -54,7 +54,9 @@ class AuthUser(BaseAuth):
             raise DoesNotExist("User not found")
         return user
 
-    async def authenticate(self, credentials: CredentialsSchema = None, user_model: User = None) -> str:
+    async def authenticate(
+        self, credentials: CredentialsSchema = None, user_model: User = None
+    ) -> str:
         if user_model:
             return generate_session_id(32)
         if not credentials:
@@ -92,7 +94,9 @@ class AuthSession(BaseAuth):
 
     async def update_session(self, session_key) -> bool:
         session = select(Session).where(session_key=session_key)
-        session.expire_date = datetime.now() + timedelta(seconds=settings.session_settings.SESSION_MAX_AGE)
+        session.expire_date = datetime.now() + timedelta(
+            seconds=settings.session_settings.SESSION_MAX_AGE
+        )
         self.session.add(session)
         await self.session.commit()
         logger.info("Session updated")

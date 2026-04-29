@@ -1,7 +1,10 @@
 from functools import lru_cache
 
 from redis.asyncio import Redis
-from redis.exceptions import ConnectionError as RedisConnectionError, TimeoutError as RedisTimeoutError
+from redis.exceptions import (
+    ConnectionError as RedisConnectionError,
+    TimeoutError as RedisTimeoutError,
+)
 
 from src.core.config import settings
 from src.core.logging_app import get_logger

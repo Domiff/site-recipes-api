@@ -23,8 +23,13 @@ async def get_csrf_token(csrf_protect: CsrfProtectDep) -> Response:
 
 
 @router.post("/registration")
-async def registration(credentials: CredentialsSchema, session: SessionDep) -> JSONResponse:
-    response = JSONResponse(content={"detail": "User created successfully"}, status_code=status.HTTP_201_CREATED)
+async def registration(
+    credentials: CredentialsSchema, session: SessionDep
+) -> JSONResponse:
+    response = JSONResponse(
+        content={"detail": "User created successfully"},
+        status_code=status.HTTP_201_CREATED,
+    )
     session_id = await register_user(credentials, session)
     response.set_cookie(
         key="session_id",
@@ -38,8 +43,12 @@ async def registration(credentials: CredentialsSchema, session: SessionDep) -> J
 
 
 @router.post("/login")
-async def login(credentials: CredentialsSchema, session: SessionDep, cookie_session_id: str) -> Response:
-    response = JSONResponse(content={"detail": "Logged in successfully"}, status_code=status.HTTP_200_OK)
+async def login(
+    credentials: CredentialsSchema, session: SessionDep, cookie_session_id: str
+) -> Response:
+    response = JSONResponse(
+        content={"detail": "Logged in successfully"}, status_code=status.HTTP_200_OK
+    )
     session_id = await login_user(credentials, session, cookie_session_id)
     response.set_cookie(
         key="session_id",
@@ -54,7 +63,10 @@ async def login(credentials: CredentialsSchema, session: SessionDep, cookie_sess
 
 @router.post("/logout")
 async def logout(cookie_session_id: str, session: SessionDep) -> Response:
-    response = JSONResponse(content={"detail": "Logged out successfully"}, status_code=status.HTTP_204_NO_CONTENT)
+    response = JSONResponse(
+        content={"detail": "Logged out successfully"},
+        status_code=status.HTTP_204_NO_CONTENT,
+    )
     await logout_user(cookie_session_id, session)
     response.delete_cookie("session_id")
     return response

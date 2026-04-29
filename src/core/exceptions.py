@@ -6,7 +6,9 @@ class AppException(HTTPException):
     STATUS_CODE = 500
 
     def __init__(
-        self, detail: str | None = None, status_code: int | None = None,
+        self,
+        detail: str | None = None,
+        status_code: int | None = None,
     ) -> None:
         if detail is None:
             self.detail = self.DETAIL

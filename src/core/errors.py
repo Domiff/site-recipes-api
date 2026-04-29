@@ -6,9 +6,14 @@ from src.core.logging_app import get_logger
 
 logger = get_logger(__name__)
 
-async def _csrf_protect_exception_handler(request: Request, exc: CsrfProtectError) -> JSONResponse:
+
+async def _csrf_protect_exception_handler(
+    request: Request, exc: CsrfProtectError
+) -> JSONResponse:
     logger.error(exc.message)
-    return JSONResponse(status_code=exc.status_code, content={"detail": "Error with CSRF protection"})
+    return JSONResponse(
+        status_code=exc.status_code, content={"detail": "Error with CSRF protection"}
+    )
 
 
 def setup_errors(app: FastAPI) -> None:
