@@ -26,53 +26,50 @@ class RedisClient:
     def __init__(self):
         self.redis = get_redis()
 
-    async def set(self, key: str, value) -> bool:
+    async def set(self, key: str, value) -> None:
         try:
             await self.redis.set(key, value, ex=settings.redis_settings.EXPIRE)
             logger.info("redis_set", key=key)
-            return True
         except (RedisConnectionError, RedisTimeoutError) as e:
             logger.error("Redis connection error", error=str(e))
-            return False
+            raise
         except Exception as e:
             logger.error("Redis set operation failed", key=key, error=str(e))
-            raise e
+            raise
 
-    async def get(self, key: str) -> str | bool:
+    async def get(self, key: str) -> str | None:
         try:
             value = await self.redis.get(key)
             if value:
                 logger.info("redis_get", key=key)
                 return value
             else:
-                return "Does not exist"
+                return None
         except (RedisConnectionError, RedisTimeoutError) as e:
             logger.error("Redis connection error", error=str(e))
-            return False
+            raise
         except Exception as e:
             logger.error("Redis get operation failed", key=key, error=str(e))
-            raise e
+            raise
 
-    async def expire(self, key: str) -> bool:
+    async def expire(self, key: str) -> None:
         try:
             await self.redis.expire(key, settings.redis_settings.EXPIRE)
             logger.info("redis_expire", key=key)
-            return True
         except (RedisConnectionError, RedisTimeoutError) as e:
             logger.error("Redis connection error", error=str(e))
-            return False
+            raise
         except Exception as e:
             logger.error("Redis expire operation failed", key=key, error=str(e))
-            raise e
+            raise
 
-    async def delete(self, key: str) -> bool:
+    async def delete(self, key: str) -> None:
         try:
             await self.redis.delete(key)
             logger.info("redis_delete", key=key)
-            return True
         except (RedisConnectionError, RedisTimeoutError) as e:
             logger.error("Redis connection error", error=str(e))
-            return False
+            raise
         except Exception as e:
             logger.error("Redis delete operation failed", key=key, error=str(e))
-            raise e
+            raise
