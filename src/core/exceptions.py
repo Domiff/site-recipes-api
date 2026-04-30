@@ -30,3 +30,8 @@ class IncorrectCredentials(AppException):
 class DoesNotExist(AppException):
     DETAIL = "Not Found"
     STATUS_CODE = 404
+
+
+class Unauthorized(AppException):
+    DETAIL = "Unauthorized"
+    STATUS_CODE = 401

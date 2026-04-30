@@ -32,9 +32,7 @@ async def login_user(
     return session_id
 
 
-async def logout_user(cookie_session_id: str, session: AsyncSession) -> bool:
+async def logout_user(cookie_session_id: str) -> bool:
     redis = RedisClient()
-    auth_session = AuthSession(session=session)
-    await auth_session.delete_session(cookie_session_id)
     await redis.delete(cookie_session_id)
     return True

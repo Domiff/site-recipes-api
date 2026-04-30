@@ -51,7 +51,7 @@ class RedisSettings(AppSettings):
     REDIS_PORT: int = 6379
     REDIS_DB: int = 0
     CONNECTION_POOL_MAXSIZE: int = 10
-    EXPIRE: int = 60 * 60
+    EXPIRE: int = 60 * 60 * 24 * 14
 
     def model_post_init(self, __context) -> None:
         object.__setattr__(
