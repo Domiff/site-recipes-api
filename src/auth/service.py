@@ -25,9 +25,7 @@ async def login_user(
 ) -> str:
     redis = RedisClient()
     auth_user = AuthUser(session=session)
-    auth_session = AuthSession(session=session)
     session_id = await auth_user.authenticate(credentials=credentials)
-    await auth_session.update_session(session_id)
     await redis.expire(cookie_session_id)
     return session_id
 
