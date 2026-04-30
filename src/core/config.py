@@ -19,7 +19,7 @@ class AppSettings(BaseSettings):
 
 
 class DBSettings(AppSettings):
-    SQLITE_URL: str = "sqlite+aisqlite:///db.sqlite3"
+    SQLITE_URL: str = "sqlite+aiosqlite:///db.sqlite3"
 
     POSTGRES_DB: str = "POSTGRES_DB"
     POSTGRES_USER: str = "POSTGRES_USER"
