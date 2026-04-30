@@ -1,10 +1,11 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from src.auth.depends import get_current_user
 from src.core.database import SessionDep  # noqa
 from src.recipes.repository import Repository
 from src.recipes.schemas import RecipeData, RecipeResponse  # noqa
 
-router = APIRouter(prefix="/recipes")
+router = APIRouter(prefix="/recipes", dependencies=[Depends(get_current_user)])
 
 
 @router.get("/")
