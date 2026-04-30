@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User, Session
@@ -39,12 +39,13 @@ class AuthUser(BaseAuth):
             raise AlreadyExists("User already exists")
 
     async def get_user_by_email(self, email: str) -> User:
-        query = select(User).where(User.email == email, User.is_active)
-        result = await self.session.execute(query)
-        user = result.scalar_one()
-        if not user:
+        try:
+            query = select(User).where(User.email == email, User.is_active)
+            result = await self.session.execute(query)
+            user = result.scalar_one()
+            return user
+        except NoResultFound:
             raise DoesNotExist("User not found")
-        return user
 
     async def authenticate(
         self, credentials: CredentialsSchema = None, user_model: User = None
