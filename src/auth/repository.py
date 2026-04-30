@@ -46,25 +46,13 @@ class AuthUser(BaseAuth):
             raise DoesNotExist("User not found")
         return user
 
-    async def get_user_by_username(self, username: str) -> User:
-        query = select(User).where(User.username == username, User.is_active)
-        result = await self.session.execute(query)
-        user = result.scalar_one()
-        if not user:
-            raise DoesNotExist("User not found")
-        return user
-
     async def authenticate(
         self, credentials: CredentialsSchema = None, user_model: User = None
     ) -> str:
         if user_model:
             return generate_session_id(32)
-        if not credentials:
-            raise IncorrectCredentials("Incorrect credentials")
-        if credentials.email:
+        if credentials:
             user = await self.get_user_by_email(credentials.email)
-        elif credentials.username:
-            user = await self.get_user_by_username(credentials.username)
         else:
             raise IncorrectCredentials("Incorrect credentials")
         user = UserSchema.model_validate(user, from_attributes=True)

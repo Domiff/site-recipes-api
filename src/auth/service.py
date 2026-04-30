@@ -32,9 +32,6 @@ async def login_user(
     return session_id
 
 
-# TODO: add refresh, check for cache
-
-
 async def logout_user(cookie_session_id: str, session: AsyncSession) -> bool:
     redis = RedisClient()
     auth_session = AuthSession(session=session)

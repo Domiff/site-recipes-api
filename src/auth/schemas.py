@@ -14,4 +14,4 @@ class UserSchema(BaseModel):
 class CredentialsSchema(BaseModel):
     username: str | None = None
     password: str
-    email: EmailStr | None = None
+    email: EmailStr
