@@ -21,12 +21,10 @@ async def register_user(credentials: CredentialsSchema, session: AsyncSession) -
 
 
 async def login_user(
-    credentials: CredentialsSchema, session: AsyncSession, cookie_session_id
+    credentials: CredentialsSchema, session: AsyncSession
 ) -> str:
-    redis = RedisClient()
     auth_user = AuthUser(session=session)
     session_id = await auth_user.authenticate(credentials=credentials)
-    await redis.expire(cookie_session_id)
     return session_id
 
 

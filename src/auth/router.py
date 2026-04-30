@@ -44,12 +44,12 @@ async def registration(
 
 @router.post("/login")
 async def login(
-    credentials: CredentialsSchema, session: SessionDep, cookie_session_id: str
+    credentials: CredentialsSchema, session: SessionDep
 ) -> Response:
     response = JSONResponse(
         content={"detail": "Logged in successfully"}, status_code=status.HTTP_200_OK
     )
-    session_id = await login_user(credentials, session, cookie_session_id)
+    session_id = await login_user(credentials, session)
     response.set_cookie(
         key="session_id",
         value=session_id,
