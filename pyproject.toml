@@ -21,6 +21,7 @@ uvloop = "^0.22.1"
 fastapi-csrf-protect = "^1.0.7"
 bcrypt = "^5.0.0"
 redis = "^7.4.0"
+asyncpg = "^0.31.0"
 
 
 [tool.ruff]
