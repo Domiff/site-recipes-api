@@ -9,7 +9,7 @@ from src.auth.service import register_user, login_user, logout_user
 from src.core.config import settings
 from src.core.database import SessionDep
 
-router = APIRouter()
+router = APIRouter(prefix="/auth")
 
 CsrfProtectDep = Annotated[CsrfProtect, Depends()]
 
