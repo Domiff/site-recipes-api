@@ -45,7 +45,7 @@ async def registration(
 @router.post("/login")
 async def login(
     credentials: CredentialsSchema, session: SessionDep
-) -> Response:
+) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "Logged in successfully"}, status_code=status.HTTP_200_OK
     )
@@ -62,7 +62,7 @@ async def login(
 
 
 @router.post("/logout")
-async def logout(cookie_session_id: str) -> Response:
+async def logout(cookie_session_id: str) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "Logged out successfully"},
         status_code=status.HTTP_204_NO_CONTENT,
