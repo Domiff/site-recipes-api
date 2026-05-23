@@ -7,10 +7,9 @@ from src.core.redis import RedisClient
 
 
 logger = get_logger(__name__)
-
+redis = RedisClient()
 
 async def register_user(credentials: CredentialsSchema, session: AsyncSession) -> str:
-    redis = RedisClient()
     auth_user = AuthUser(session=session)
     auth_session = AuthSession(session=session)
     user = await auth_user.create_user(credentials)
@@ -25,10 +24,10 @@ async def login_user(
 ) -> str:
     auth_user = AuthUser(session=session)
     session_id = await auth_user.authenticate(credentials=credentials)
+    await redis.set(session_id, credentials.username)
     return session_id
 
 
 async def logout_user(cookie_session_id: str) -> bool:
-    redis = RedisClient()
     await redis.delete(cookie_session_id)
     return True
