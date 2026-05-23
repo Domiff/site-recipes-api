@@ -2,13 +2,14 @@ import logging
 import os
 import sys
 from typing import Any
+from logging.handlers import RotatingFileHandler
 
 import structlog
 from pythonjsonlogger.json import JsonFormatter
 
 from src.core.config import BASE_DIR, settings
 
-LOG_LEVEL = "INFO"
+LOG_LEVEL = "DEBUG" if settings.app_settings.IS_DEBUG else "INFO"
 
 
 def sanitize_for_logging(data: Any) -> Any:
@@ -64,7 +65,7 @@ def configure_logging() -> None:
         if settings.app_settings.IS_DOCKERIZED:
             log_dir = f"{BASE_DIR}/logs"
             os.makedirs(log_dir, exist_ok=True)
-            file_handler = logging.handlers.RotatingFileHandler(
+            file_handler = RotatingFileHandler(
                 os.path.join(log_dir, "app.log"), maxBytes=5_000_000, backupCount=3
             )
             if formatter:
