@@ -64,11 +64,27 @@ class RedisSettings(AppSettings):
         )
 
 
+class GunicornSettings(AppSettings):
+    HOST: str = "localhost"
+    PORT: int = 8080
+    TIMEOUT: int = 900
+
+    def model_post_init(self, __context) -> None:
+        object.__setattr__(
+            self, "WORKERS", 1 if self.IS_DEBUG else 4
+        )
+        object.__setattr__(
+            self,
+            "LOG_LEVEL", "DEBUG" if self.IS_DEBUG else "INFO",
+        )
+
+
 class Settings(AppSettings):
     app_settings: AppSettings = AppSettings()
     db_settings: DBSettings = DBSettings()
     session_settings: SessionSettings = SessionSettings()
     redis_settings: RedisSettings = RedisSettings()
+    gunicorn_settings: GunicornSettings = GunicornSettings()
 
 
 settings = Settings()
