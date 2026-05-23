@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User, Session
 from src.auth.schemas import CredentialsSchema, UserSchema
-from src.auth.utils import hash_password, verify_password, generate_session_id
+from src.auth.utils import hash_password, verify_password, generate_session_id, expire_at
 from src.core.config import settings
 from src.core.exceptions import AlreadyExists, IncorrectCredentials, DoesNotExist
 from src.core.logging_app import get_logger
@@ -68,7 +68,7 @@ class AuthSession(BaseAuth):
         session = Session(
             session_key=session_key,
             session_data=session_data,
-            expire_date=settings.session_settings.SESSION_MAX_AGE,
+            expire_date=expire_at(),
         )
         self.session.add(session)
         await self.session.commit()
