@@ -18,8 +18,8 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     params = {
-        "is_debug": settings.app_settings.IS_DEBUG,
-        "is_dockerized": settings.app_settings.IS_DOCKERIZED,
+        "is_debug": settings.app.IS_DEBUG,
+        "is_dockerized": settings.app.IS_DOCKERIZED,
     }
     logger.info("Starting application", **params)
     logger.info("Application started")
@@ -38,7 +38,7 @@ def create_app() -> FastAPI:
         title="Site Recipes",
         version="1",
         lifespan=lifespan,
-        openapi_url="/openapi.json" if settings.app_settings.IS_DEBUG else None,
+        openapi_url="/openapi.json" if settings.app.IS_DEBUG else None,
     )
 
     setup_middlewares(app)

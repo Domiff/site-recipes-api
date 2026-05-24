@@ -35,7 +35,7 @@ async def registration(
         key="session_id",
         value=session_id,
         httponly=True,
-        max_age=settings.session_settings.SESSION_MAX_AGE,
+        max_age=settings.session.SESSION_MAX_AGE,
         secure=True,
         samesite="lax",
     )
@@ -54,7 +54,7 @@ async def login(
         key="session_id",
         value=session_id,
         httponly=True,
-        max_age=settings.session_settings.SESSION_MAX_AGE,
+        max_age=settings.session.SESSION_MAX_AGE,
         secure=True,
         samesite="lax",
     )

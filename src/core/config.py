@@ -80,11 +80,11 @@ class GunicornSettings(AppSettings):
 
 
 class Settings(AppSettings):
-    app_settings: AppSettings = AppSettings()
-    db_settings: DBSettings = DBSettings()
-    session_settings: SessionSettings = SessionSettings()
-    redis_settings: RedisSettings = RedisSettings()
-    gunicorn_settings: GunicornSettings = GunicornSettings()
+    app: AppSettings = AppSettings()
+    db: DBSettings = DBSettings()
+    session: SessionSettings = SessionSettings()
+    redis: RedisSettings = RedisSettings()
+    gunicorn: GunicornSettings = GunicornSettings()
 
 
 settings = Settings()
@@ -92,4 +92,4 @@ settings = Settings()
 
 @CsrfProtect.load_config
 def get_csrf_config():
-    return settings.session_settings
+    return settings.session

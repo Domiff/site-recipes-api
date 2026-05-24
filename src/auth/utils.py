@@ -25,4 +25,4 @@ def get_now() -> datetime:
 
 
 def expire_at() -> datetime:
-    return get_now() + timedelta(seconds=settings.session_settings.SESSION_MAX_AGE)
+    return get_now() + timedelta(seconds=settings.session.SESSION_MAX_AGE)

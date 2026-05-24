@@ -84,7 +84,7 @@ class AuthSession(BaseAuth):
     async def update_session(self, session_key) -> bool:
         session = select(Session).where(session_key=session_key)
         session.expire_date = datetime.now() + timedelta(
-            seconds=settings.session_settings.SESSION_MAX_AGE
+            seconds=settings.session.SESSION_MAX_AGE
         )
         self.session.add(session)
         await self.session.commit()

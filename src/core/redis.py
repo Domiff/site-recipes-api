@@ -16,8 +16,8 @@ logger = get_logger(__name__)
 @lru_cache
 def get_redis() -> Redis:
     return Redis.from_url(
-        url=settings.redis_settings.REDIS_URL,
-        max_connections=settings.redis_settings.CONNECTION_POOL_MAXSIZE,
+        url=settings.redis.REDIS_URL,
+        max_connections=settings.redis.CONNECTION_POOL_MAXSIZE,
         decode_responses=True,
     )
 
@@ -28,7 +28,7 @@ class RedisClient:
 
     async def set(self, key: str, value) -> None:
         try:
-            await self.redis.set(key, value, ex=settings.redis_settings.EXPIRE)
+            await self.redis.set(key, value, ex=settings.redis.EXPIRE)
             logger.info("redis_set", key=key)
         except (RedisConnectionError, RedisTimeoutError) as e:
             logger.error("Redis connection error", error=str(e))
@@ -54,7 +54,7 @@ class RedisClient:
 
     async def expire(self, key: str) -> None:
         try:
-            await self.redis.expire(key, settings.redis_settings.EXPIRE)
+            await self.redis.expire(key, settings.redis.EXPIRE)
             logger.info("redis_expire", key=key)
         except (RedisConnectionError, RedisTimeoutError) as e:
             logger.error("Redis connection error", error=str(e))
