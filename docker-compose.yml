@@ -7,13 +7,9 @@ services:
       IS_DOCKERIZED: "true"
     env_file:
       .env
-    command:
-      - uvicorn
-      - src.main:app
-      - --host
-      - 0.0.0.0
-      - --port
-      - "8080"
+    command: python -m src.main
+    ports:
+      - "8080:8080"
     depends_on:
       pg:
         condition: service_healthy

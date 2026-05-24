@@ -1,25 +1,14 @@
-FROM python:3.13-slim
+FROM python:3.14-slim
 
-ENV POETRY_VERSION=1.8.0 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
-    curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry && \
-    apt-get purge -y curl && \
-    rm -rf /var/lib/apt/lists/*
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
 
-COPY pyproject.toml poetry.lock ./
+COPY ./pyproject.toml ./
 
-RUN poetry config virtualenvs.create false \
- && poetry install --no-interaction --no-ansi
+ENV UV_PROJECT_ENVIRONMENT=/usr/local
+RUN uv sync
 
-COPY . ./
+COPY . .
 
 EXPOSE 8080
-
-CMD ["uvicorn", "main:app", "--host 0.0.0.0", "--port 8080"]
