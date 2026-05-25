@@ -1,5 +1,4 @@
-from collections.abc import AsyncGenerator  # noqa
-from typing import Annotated
+from typing import Annotated, AsyncGenerator
 
 from fastapi import Depends
 from sqlalchemy import text
