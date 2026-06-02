@@ -1,59 +1,47 @@
+from typing import Annotated
+
+from fastapi import Depends
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.core.database import SessionDep  # noqa
 from src.recipes.models import Category, Recipe
-from src.recipes.schemas import RecipeData, RecipeRequest, RecipeResponse
+from src.recipes.schemas import RecipeData, RecipeRequest
 from src.core.logging_app import get_logger
 
 
 logger = get_logger(__name__)
 
 
-class Repository:
-    @classmethod
-    async def get_all_recipes(cls, session: SessionDep) -> list[RecipeResponse] | str:
-        query = select(Recipe).options(selectinload(Recipe.categories))
-        recipes = (await session.execute(query)).scalars().all()
-        if recipes:
-            return [RecipeResponse.model_validate(recipe) for recipe in recipes]
-        return "Recipes not found"
+class RecipeRepository:
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
 
-    @classmethod
-    async def get_recipe(
-        cls, recipe_title: str, session: SessionDep
-    ) -> RecipeResponse | str:
+    async def get_all_recipes(self) -> list[Recipe]:
+        query = select(Recipe).options(selectinload(Recipe.categories))
+        return list((await self.session.execute(query)).scalars().all())
+
+    async def get_recipe(self, recipe_title: str) -> Recipe | None:
         query = (
             select(Recipe)
-            .options(joinedload(Recipe.categories.id))
+            .options(selectinload(Recipe.categories))
             .where(Recipe.title == recipe_title)
         )
-        recipe = (await session.execute(query)).scalar()
-        if recipe:
-            return RecipeResponse.model_validate(recipe)
-        return "Recipe not found"
+        return (await self.session.execute(query)).scalar()
 
-    @classmethod
-    async def get_recipe_with_ingredient(
-        cls, ingredient: str, session: SessionDep
-    ) -> RecipeResponse | str:
+    async def get_recipe_with_ingredient(self, ingredient: str) -> Recipe | None:
         query = (
             select(Recipe)
-            .options(joinedload(Recipe.categories))
+            .options(selectinload(Recipe.categories))
             .where(Recipe.ingredients.contains(ingredient))
         )
-        recipe = (await session.execute(query)).scalar()
-        if recipe:
-            return RecipeResponse.model_validate(recipe)
-        return "Recipe not found"
+        return (await self.session.execute(query)).scalar()
 
-    @classmethod
-    async def add_recipe(
-        cls, data: RecipeRequest, session: SessionDep
-    ) -> RecipeResponse | None:
+    async def add_recipe(self, data: RecipeRequest) -> Recipe:
         logger.info("Creating recipe", title=data.title)
         query = select(Category).where(Category.id.in_(data.categories))
-        categories = await session.execute(query)
+        categories = await self.session.execute(query)
         recipe = Recipe(
             title=data.title,
             ingredients=data.ingredients,
@@ -63,26 +51,23 @@ class Repository:
             categories=categories.scalars().all(),
         )
 
-        session.add(recipe)
-        await session.commit()
-        await session.refresh(recipe)
+        self.session.add(recipe)
+        await self.session.commit()
+        await self.session.refresh(recipe)
         logger.info("Recipe created", recipe_id=recipe.id)
-        return RecipeResponse.model_validate(recipe)
+        return recipe
 
-    @classmethod
-    async def update_recipe(
-        cls, id_: int, data: RecipeData, session: SessionDep
-    ) -> RecipeResponse | str:
+    async def update_recipe(self, id_: int, data: RecipeData) -> Recipe | None:
         logger.info("Updating recipe", recipe_id=id_)
         query = (
             select(Recipe)
             .options(selectinload(Recipe.categories))
             .where(Recipe.id == id_)
         )
-        recipe = (await session.execute(query)).scalar()
+        recipe = (await self.session.execute(query)).scalar()
         if not recipe:
             logger.warning("Recipe for update not found", recipe_id=id_)
-            return "Recipe not found"
+            return None
 
         payload = data.model_dump(exclude_unset=True, exclude_none=True)
         category_ids = payload.pop("categories", None)
@@ -94,23 +79,29 @@ class Repository:
             recipe.categories = []
         else:
             category_query = select(Category).where(Category.id.in_(category_ids))
-            categories = (await session.execute(category_query)).scalars().all()
+            categories = (await self.session.execute(category_query)).scalars().all()
             recipe.categories = categories
 
-        await session.commit()
-        await session.refresh(recipe, attribute_names=["categories"])
+        await self.session.commit()
+        await self.session.refresh(recipe, attribute_names=["categories"])
         logger.info("Recipe updated", recipe_id=id_)
-        return RecipeResponse.model_validate(recipe)
+        return recipe
 
-    @classmethod
-    async def delete_recipe(cls, id_: int, session: SessionDep) -> dict:
+    async def delete_recipe(self, id_: int) -> bool:
         logger.info("Deleting recipe", recipe_id=id_)
         query = select(Recipe).where(Recipe.id == id_)
-        recipe = (await session.execute(query)).scalar()
+        recipe = (await self.session.execute(query)).scalar()
         if recipe:
-            await session.delete(recipe)
-            await session.commit()
+            await self.session.delete(recipe)
+            await self.session.commit()
             logger.info("Recipe deleted", recipe_id=id_)
-            return {"message": True}
+            return True
         logger.warning("Recipe for delete not found", recipe_id=id_)
-        return {"error": "Recipe not found"}
+        return False
+
+
+def get_recipe_repo(session: SessionDep) -> RecipeRepository:
+    return RecipeRepository(session)
+
+
+RecipeRepoDep = Annotated[RecipeRepository, Depends(get_recipe_repo)]
