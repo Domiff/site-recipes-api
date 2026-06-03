@@ -24,6 +24,8 @@ dependencies = [
     "uvicorn-worker>=0.4.0",
     "httptools>=0.7.1",
     "gunicorn>=26.0.0",
+    "fastapi-pagination>=0.15.14",
+    "sqlakeyset>=2.0.1775222100",
 ]
 
 [dependency-groups]

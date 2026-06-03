@@ -1,6 +1,9 @@
 from typing import Annotated, Any
 
-from fastapi import Body
+from fastapi import Body, Depends
+from fastapi_pagination.bases import CursorRawParams
+from fastapi_pagination.cursor import CursorPage, CursorParams
+from fastapi_pagination.customization import CustomizedPage, UseIncludeTotal
 from pydantic import BaseModel, ConfigDict, field_validator
 
 
@@ -34,4 +37,19 @@ class RecipeResponse(Recipe):
     model_config = ConfigDict(from_attributes=True)
 
 
+class WithoutTotalCursorParams(CursorParams):
+    def to_raw_params(self) -> CursorRawParams:
+        return CursorRawParams(
+            cursor=self.decode_cursor(self.cursor),
+            size=self.size,
+            include_total=False,
+        )
+
+
+WithoutTotalCursorPage = CustomizedPage[
+    CursorPage,
+    UseIncludeTotal(False),
+]
+
 RecipeData = Annotated[RecipeRequest, Body()]
+WithoutTotalCursorParamsDep = Annotated[WithoutTotalCursorParams, Depends()]

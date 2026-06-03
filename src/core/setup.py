@@ -2,6 +2,7 @@ from collections.abc import AsyncGenerator  # noqa
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi_pagination import add_pagination
 from starlette.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
@@ -44,6 +45,7 @@ def create_app() -> FastAPI:
     setup_middlewares(app)
     setup_healthcheck(app)
     setup_errors(app)
+    add_pagination(app)
 
     app.include_router(recipes_router, tags=["recipes"])
     app.include_router(auth_router, tags=["auth"])

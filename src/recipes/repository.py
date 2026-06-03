@@ -1,15 +1,14 @@
 from typing import Annotated
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import Select, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from src.core.database import SessionDep  # noqa
+from src.core.logging_app import get_logger
 from src.recipes.models import Category, Recipe
 from src.recipes.schemas import RecipeData, RecipeRequest
-from src.core.logging_app import get_logger
-
 
 logger = get_logger(__name__)
 
@@ -18,25 +17,28 @@ class RecipeRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def get_all_recipes(self) -> list[Recipe]:
-        query = select(Recipe).options(selectinload(Recipe.categories))
-        return list((await self.session.execute(query)).scalars().all())
+    async def get_all_recipes(self) -> Select:
+        return (
+            select(Recipe).options(selectinload(Recipe.categories)).order_by(Recipe.id)
+        )
 
-    async def get_recipe(self, recipe_title: str) -> Recipe | None:
+    async def get_recipe(self, recipe_title: str) -> Select:
         query = (
             select(Recipe)
             .options(selectinload(Recipe.categories))
             .where(Recipe.title == recipe_title)
+            .order_by(Recipe.id)
         )
-        return (await self.session.execute(query)).scalar()
+        return query
 
-    async def get_recipe_with_ingredient(self, ingredient: str) -> Recipe | None:
+    async def get_recipe_with_ingredient(self, ingredient: str) -> Select:
         query = (
             select(Recipe)
             .options(selectinload(Recipe.categories))
-            .where(Recipe.ingredients.contains(ingredient))
+            .where(Recipe.ingredients.icontains(ingredient))
+            .order_by(Recipe.id)
         )
-        return (await self.session.execute(query)).scalar()
+        return query
 
     async def add_recipe(self, data: RecipeRequest) -> Recipe:
         logger.info("Creating recipe", title=data.title)

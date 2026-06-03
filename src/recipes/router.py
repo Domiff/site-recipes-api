@@ -1,36 +1,43 @@
 from fastapi import APIRouter, Depends
+from fastapi_pagination.ext.sqlalchemy import apaginate
 
-from src.auth.depends import get_current_user
+from src.auth.depends import get_current_user  # noqa
 from src.recipes.repository import RecipeRepoDep
-from src.recipes.schemas import RecipeData, RecipeResponse  # noqa
+from src.recipes.schemas import (
+    RecipeData,
+    RecipeResponse,
+    WithoutTotalCursorPage,
+    WithoutTotalCursorParamsDep,
+)  # noqa
 
-router = APIRouter(prefix="/recipes", dependencies=[Depends(get_current_user)])
-
-
-@router.get("/")
-async def get_all_recipes(repo: RecipeRepoDep) -> list[RecipeResponse] | str:
-    recipes = await repo.get_all_recipes()
-    if not recipes:
-        return "Recipes not found"
-    return [RecipeResponse.model_validate(recipe) for recipe in recipes]
-
-
-@router.get("/{recipe_title}")
-async def get_recipe(recipe_title: str, repo: RecipeRepoDep) -> RecipeResponse | str:
-    recipe = await repo.get_recipe(recipe_title)
-    if not recipe:
-        return "Recipe not found"
-    return RecipeResponse.model_validate(recipe)
+router = APIRouter(
+    prefix="/recipes",
+    dependencies=[Depends(get_current_user)]
+)
 
 
-@router.get("/{recipe_ingredient}")
+@router.get("/", response_model_exclude_none=True)
+async def get_all_recipes(
+    repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
+) -> WithoutTotalCursorPage[RecipeResponse]:
+    query = await repo.get_all_recipes()
+    return await apaginate(query=query, conn=repo.session, params=params)
+
+
+@router.get("/title/{recipe_title}", response_model_exclude_none=True)
+async def get_recipe(
+    recipe_title: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
+) -> WithoutTotalCursorPage[RecipeResponse]:
+    query = await repo.get_recipe(recipe_title)
+    return await apaginate(query=query, conn=repo.session, params=params)
+
+
+@router.get("/ingredient/{recipe_ingredient}", response_model_exclude_none=True)
 async def get_recipe_with_ingredient(
-    ingredient: str, repo: RecipeRepoDep
-) -> RecipeResponse | str:
-    recipe = await repo.get_recipe_with_ingredient(ingredient)
-    if not recipe:
-        return "Recipe not found"
-    return RecipeResponse.model_validate(recipe)
+    ingredient: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
+) -> WithoutTotalCursorPage[RecipeResponse]:
+    query = await repo.get_recipe_with_ingredient(ingredient)
+    return await apaginate(query=query, conn=repo.session, params=params)
 
 
 @router.post("/")
