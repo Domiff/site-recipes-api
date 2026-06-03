@@ -5,7 +5,7 @@ from src.auth.depends import get_current_user  # noqa
 from src.recipes.repository import RecipeRepoDep
 from src.recipes.schemas import (
     RecipeData,
-    RecipeResponse,
+    RecipeOut,
     WithoutTotalCursorPage,
     WithoutTotalCursorParamsDep,
 )  # noqa
@@ -19,7 +19,7 @@ router = APIRouter(
 @router.get("/", response_model_exclude_none=True)
 async def get_all_recipes(
     repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
-) -> WithoutTotalCursorPage[RecipeResponse]:
+) -> WithoutTotalCursorPage[RecipeOut]:
     query = await repo.get_all_recipes()
     return await apaginate(query=query, conn=repo.session, params=params)
 
@@ -27,7 +27,7 @@ async def get_all_recipes(
 @router.get("/title/{recipe_title}", response_model_exclude_none=True)
 async def get_recipe(
     recipe_title: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
-) -> WithoutTotalCursorPage[RecipeResponse]:
+) -> WithoutTotalCursorPage[RecipeOut]:
     query = await repo.get_recipe(recipe_title)
     return await apaginate(query=query, conn=repo.session, params=params)
 
@@ -35,13 +35,13 @@ async def get_recipe(
 @router.get("/ingredient/{recipe_ingredient}", response_model_exclude_none=True)
 async def get_recipe_with_ingredient(
     ingredient: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
-) -> WithoutTotalCursorPage[RecipeResponse]:
+) -> WithoutTotalCursorPage[RecipeOut]:
     query = await repo.get_recipe_with_ingredient(ingredient)
     return await apaginate(query=query, conn=repo.session, params=params)
 
 
 @router.post("/")
-async def add_recipe(data: RecipeData, repo: RecipeRepoDep) -> RecipeResponse | None:
+async def add_recipe(data: RecipeData, repo: RecipeRepoDep) -> RecipeOut | None:
     """
     Id category for recipes:
     1 - Закуска
@@ -51,17 +51,17 @@ async def add_recipe(data: RecipeData, repo: RecipeRepoDep) -> RecipeResponse | 
     5 - Суп
     """
     recipe = await repo.add_recipe(data)
-    return RecipeResponse.model_validate(recipe)
+    return RecipeOut.model_validate(recipe)
 
 
 @router.patch("/update/{id_}")
 async def update_recipe(
     id_: int, data: RecipeData, repo: RecipeRepoDep
-) -> RecipeResponse | str:
+) -> RecipeOut | str:
     recipe = await repo.update_recipe(id_, data)
     if not recipe:
         return "Recipe not found"
-    return RecipeResponse.model_validate(recipe)
+    return RecipeOut.model_validate(recipe)
 
 
 @router.delete("/delete/{id}")

@@ -8,22 +8,22 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 
 class Recipe(BaseModel):
-    title: str | None = None
-    description: str | None = None
-    ingredients: str | None = None
-    steps: str | None = None
-    time_cooking: str | None = None
+    title: str
+    description: str
+    ingredients: str
+    steps: str
+    time_cooking: str
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class RecipeRequest(Recipe):
-    categories: list[int] | None = None
+class RecipeIn(Recipe):
+    categories: list[int]
 
 
-class RecipeResponse(Recipe):
+class RecipeOut(Recipe):
     id: int
-    categories: list[str] | None = None
+    categories: list[str]
 
     @field_validator("categories", mode="before")
     @classmethod
@@ -51,5 +51,5 @@ WithoutTotalCursorPage = CustomizedPage[
     UseIncludeTotal(False),
 ]
 
-RecipeData = Annotated[RecipeRequest, Body()]
+RecipeData = Annotated[RecipeIn, Body()]
 WithoutTotalCursorParamsDep = Annotated[WithoutTotalCursorParams, Depends()]

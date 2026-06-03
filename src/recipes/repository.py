@@ -8,7 +8,7 @@ from sqlalchemy.orm import selectinload
 from src.core.database import SessionDep  # noqa
 from src.core.logging_app import get_logger
 from src.recipes.models import Category, Recipe
-from src.recipes.schemas import RecipeData, RecipeRequest
+from src.recipes.schemas import RecipeData, RecipeIn
 
 logger = get_logger(__name__)
 
@@ -40,7 +40,7 @@ class RecipeRepository:
         )
         return query
 
-    async def add_recipe(self, data: RecipeRequest) -> Recipe:
+    async def add_recipe(self, data: RecipeIn) -> Recipe:
         logger.info("Creating recipe", title=data.title)
         query = select(Category).where(Category.id.in_(data.categories))
         categories = await self.session.execute(query)
