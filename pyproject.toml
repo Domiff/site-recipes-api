@@ -61,7 +61,6 @@ select = [
     "B",
     "DJ",
     "UP",
-    "TCH",
 ]
 ignore = ["E501"]
 fixable = ["ALL"]
