@@ -5,9 +5,8 @@ from fastapi.responses import JSONResponse
 from fastapi_csrf_protect import CsrfProtect
 
 from src.auth.schemas import CredentialsSchema
-from src.auth.service import register_user, login_user, logout_user
+from src.auth.service import AuthSrviceDep
 from src.core.config import settings
-from src.core.database import SessionDep
 
 router = APIRouter(prefix="/auth")
 
@@ -24,13 +23,13 @@ async def get_csrf_token(csrf_protect: CsrfProtectDep) -> Response:
 
 @router.post("/registration")
 async def registration(
-    credentials: CredentialsSchema, session: SessionDep
+    service: AuthSrviceDep, credentials: CredentialsSchema
 ) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "User created successfully"},
         status_code=status.HTTP_201_CREATED,
     )
-    session_id = await register_user(credentials, session)
+    session_id = await service.register(credentials)
     response.set_cookie(
         key="session_id",
         value=session_id,
@@ -43,13 +42,11 @@ async def registration(
 
 
 @router.post("/login")
-async def login(
-    credentials: CredentialsSchema, session: SessionDep
-) -> JSONResponse:
+async def login(service: AuthSrviceDep, credentials: CredentialsSchema) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "Logged in successfully"}, status_code=status.HTTP_200_OK
     )
-    session_id = await login_user(credentials, session)
+    session_id = await service.login(credentials)
     response.set_cookie(
         key="session_id",
         value=session_id,
@@ -62,11 +59,11 @@ async def login(
 
 
 @router.post("/logout")
-async def logout(cookie_session_id: str) -> JSONResponse:
+async def logout(service: AuthSrviceDep, cookie_session_id: str) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "Logged out successfully"},
         status_code=status.HTTP_204_NO_CONTENT,
     )
-    await logout_user(cookie_session_id)
+    await service.logout(cookie_session_id)
     response.delete_cookie("session_id")
     return response

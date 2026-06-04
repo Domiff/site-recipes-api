@@ -1,33 +1,66 @@
+from typing import Annotated
+
+from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.auth.models import User
 from src.auth.repository import AuthUser, AuthSession
-from src.auth.schemas import CredentialsSchema
+from src.auth.schemas import CredentialsSchema, UserSchema
+from src.auth.utils import generate_session_id, verify_password
+from src.core.exceptions import IncorrectCredentials
 from src.core.logging_app import get_logger
 from src.core.redis import RedisClient
+from src.core.database import SessionDep
 
 
 logger = get_logger(__name__)
-redis = RedisClient()
-
-async def register_user(credentials: CredentialsSchema, session: AsyncSession) -> str:
-    auth_user = AuthUser(session=session)
-    auth_session = AuthSession(session=session)
-    user = await auth_user.create_user(credentials)
-    session_id = await auth_user.authenticate(user_model=user)
-    await auth_session.create_session(session_id, user.username)
-    await redis.set(session_id, user.username)
-    return session_id
 
 
-async def login_user(
-    credentials: CredentialsSchema, session: AsyncSession
-) -> str:
-    auth_user = AuthUser(session=session)
-    session_id = await auth_user.authenticate(credentials=credentials)
-    await redis.set(session_id, credentials.username)
-    return session_id
+class AuthSrvice:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+        self.user_repo = AuthUser(self.session)
+        self.session_repo = AuthSession(self.session)
+        self.redis = RedisClient()
+
+    async def register(self, credentials: CredentialsSchema) -> str:
+        user = await self.user_repo.create_user(credentials)
+        session_id = await self.authenticate(user_model=user)
+        await self.session_repo.create_session(session_id, user.username)
+        await self.redis.set(session_id, user.username)
+        logger.info("User registered", session_id=session_id)
+        return session_id
+
+    async def login(self, credentials: CredentialsSchema) -> str:
+        session_id = await self.authenticate(credentials=credentials)
+        await self.redis.set(session_id, credentials.username)
+        logger.info("User logged in", session_id=session_id)
+        return session_id
+
+    async def logout(self, cookie_session_id: str) -> bool:
+        await self.redis.delete(cookie_session_id)
+        await self.session_repo.delete_session(cookie_session_id)
+        logger.info("User logged out", session_id=cookie_session_id)
+        return True
+
+    async def authenticate(
+        self, credentials: CredentialsSchema = None, user_model: User = None
+    ) -> str:
+        if user_model:
+            return generate_session_id(32)
+        if credentials:
+            user = await self.user_repo.get_user_by_email(credentials.email)
+        else:
+            raise IncorrectCredentials("Incorrect credentials")
+        user = UserSchema.model_validate(user, from_attributes=True)
+        if not verify_password(credentials.password, user.password):
+            logger.error("Incorrect password")
+            raise IncorrectCredentials("Incorrect credentials")
+        return generate_session_id(32)
 
 
-async def logout_user(cookie_session_id: str) -> bool:
-    await redis.delete(cookie_session_id)
-    return True
+def get_auth_service(session: SessionDep) -> AuthSrvice:
+    return AuthSrvice(session)
+
+
+AuthSrviceDep = Annotated[AuthSrvice, Depends(get_auth_service)]

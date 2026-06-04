@@ -5,10 +5,10 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User, Session
-from src.auth.schemas import CredentialsSchema, UserSchema
-from src.auth.utils import hash_password, verify_password, generate_session_id, expire_at
+from src.auth.schemas import CredentialsSchema
+from src.auth.utils import hash_password, expire_at
 from src.core.config import settings
-from src.core.exceptions import AlreadyExists, IncorrectCredentials, DoesNotExist
+from src.core.exceptions import AlreadyExists, DoesNotExist
 from src.core.logging_app import get_logger
 
 
@@ -46,21 +46,6 @@ class AuthUser(BaseAuth):
             return user
         except NoResultFound:
             raise DoesNotExist("User not found")
-
-    async def authenticate(
-        self, credentials: CredentialsSchema = None, user_model: User = None
-    ) -> str:
-        if user_model:
-            return generate_session_id(32)
-        if credentials:
-            user = await self.get_user_by_email(credentials.email)
-        else:
-            raise IncorrectCredentials("Incorrect credentials")
-        user = UserSchema.model_validate(user, from_attributes=True)
-        if not verify_password(credentials.password, user.password):
-            logger.error("Incorrect password")
-            raise IncorrectCredentials("Incorrect credentials")
-        return generate_session_id(32)
 
 
 class AuthSession(BaseAuth):
