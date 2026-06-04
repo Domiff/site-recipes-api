@@ -6,9 +6,8 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from src.auth.repository import AuthSession, AuthUser
 from src.core.database import Base
-from src.auth.repository import AuthUser, AuthSession
-
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
