@@ -13,7 +13,7 @@ from tests.factory import make_credentials, make_session_key
     ],
 )
 async def test_create_user(user_repo, credentials):
-    user = await user_repo.create_user(credentials)
+    user = await user_repo.create(credentials)
 
     assert user is not None
     assert isinstance(user, User)
@@ -29,7 +29,7 @@ async def test_create_user(user_repo, credentials):
     ],
 )
 async def test_create_session(user_repo, session_repo, credentials, session_key):
-    user = await user_repo.create_user(credentials)
+    user = await user_repo.create(credentials)
     session = await session_repo.create(session_key, user.username, user)
 
     assert user is not None
@@ -48,7 +48,7 @@ async def test_create_session(user_repo, session_repo, credentials, session_key)
     ],
 )
 async def test_get_user_by_email(user_repo, credentials):
-    await user_repo.create_user(credentials)
+    await user_repo.create(credentials)
     user = await user_repo.get_user_by_email(credentials.email)
 
     assert user is not None
@@ -64,9 +64,7 @@ async def test_get_user_by_email(user_repo, credentials):
     ],
 )
 async def test_delete_session(user_repo, session_repo, credentials, session_key):
-    user = await user_repo.create_user(credentials)
+    user = await user_repo.create(credentials)
     await session_repo.create(session_key, user.username, user)
 
-    result = await session_repo.delete(session_key)
-
-    assert isinstance(result, bool)
+    assert await session_repo.delete(session_key)
