@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from src.auth.repository import AuthSession, AuthUser
+from src.auth.service import AuthService
 from src.core.database import Base
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
@@ -30,7 +31,7 @@ async def async_engine():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 async def session(async_engine):
     async_session = async_sessionmaker(
         expire_on_commit=False,
@@ -54,3 +55,8 @@ def user_repo(session):
 @pytest.fixture
 def session_repo(session):
     return AuthSession(session)
+
+
+@pytest.fixture
+def service(session):
+    return AuthService(session)
