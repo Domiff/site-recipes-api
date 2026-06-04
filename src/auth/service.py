@@ -23,7 +23,7 @@ class AuthService:
         self.redis = RedisClient()
 
     async def register(self, credentials: CredentialsSchema) -> str:
-        user = await self.user_repo.create_user(credentials)
+        user = await self.user_repo.create(credentials)
         session_id = await self.authenticate(user_model=user)
         await self.session_repo.create(session_id, user.username, user)
         await self.redis.set(session_id, user.username)
