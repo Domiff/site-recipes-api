@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import select, delete, update
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -49,7 +49,7 @@ class AuthUser(BaseAuth):
 
 
 class AuthSession(BaseAuth):
-    async def create_session(self, session_key, session_data, user) -> Session:
+    async def create(self, session_key, session_data, user) -> Session:
         session = Session(
             session_key=session_key,
             session_data=session_data,
@@ -61,18 +61,23 @@ class AuthSession(BaseAuth):
         logger.info("Session created")
         return session
 
-    async def delete_session(self, session_key) -> bool:
-        await self.session.delete(session_key)
+    async def delete(self, session_key) -> bool:
+        stmt = delete(Session).where(session_key == session_key)
+        await self.session.execute(stmt)
         await self.session.commit()
         logger.info("Session deleted")
         return True
 
-    async def update_session(self, session_key) -> bool:
-        session = select(Session).where(session_key=session_key)
-        session.expire_date = datetime.now() + timedelta(
-            seconds=settings.session.SESSION_MAX_AGE
+    async def update(self, session_key) -> bool:
+        session = (
+            update(Session)
+            .where(session_key == session_key)
+            .values(
+                expire_date=datetime.now()
+                + timedelta(seconds=settings.session.SESSION_MAX_AGE)
+            )
         )
-        self.session.add(session)
+        await self.session.execute(session)
         await self.session.commit()
         logger.info("Session updated")
         return True
