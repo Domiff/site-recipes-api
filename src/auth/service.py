@@ -4,14 +4,13 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User
-from src.auth.repository import AuthUser, AuthSession
+from src.auth.repository import AuthSession, AuthUser
 from src.auth.schemas import CredentialsSchema, UserSchema
 from src.auth.utils import generate_session_id, verify_password
+from src.core.database import SessionDep
 from src.core.exceptions import IncorrectCredentials
 from src.core.logging_app import get_logger
 from src.core.redis import RedisClient
-from src.core.database import SessionDep
-
 
 logger = get_logger(__name__)
 
@@ -26,7 +25,7 @@ class AuthSrvice:
     async def register(self, credentials: CredentialsSchema) -> str:
         user = await self.user_repo.create_user(credentials)
         session_id = await self.authenticate(user_model=user)
-        await self.session_repo.create_session(session_id, user.username, user)
+        await self.session_repo.create(session_id, user.username, user)
         await self.redis.set(session_id, user.username)
         logger.info("User registered", session_id=session_id)
         return session_id
@@ -39,7 +38,7 @@ class AuthSrvice:
 
     async def logout(self, cookie_session_id: str) -> bool:
         await self.redis.delete(cookie_session_id)
-        await self.session_repo.delete_session(cookie_session_id)
+        await self.session_repo.delete(cookie_session_id)
         logger.info("User logged out", session_id=cookie_session_id)
         return True
 
