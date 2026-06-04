@@ -15,7 +15,7 @@ from src.core.redis import RedisClient
 logger = get_logger(__name__)
 
 
-class AuthSrvice:
+class AuthService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.user_repo = AuthUser(self.session)
@@ -58,8 +58,8 @@ class AuthSrvice:
         return generate_session_id(32)
 
 
-def get_auth_service(session: SessionDep) -> AuthSrvice:
-    return AuthSrvice(session)
+def get_auth_service(session: SessionDep) -> AuthService:
+    return AuthService(session)
 
 
-AuthSrviceDep = Annotated[AuthSrvice, Depends(get_auth_service)]
+AuthServiceDep = Annotated[AuthService, Depends(get_auth_service)]

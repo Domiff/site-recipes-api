@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi_csrf_protect import CsrfProtect
 
 from src.auth.schemas import CredentialsSchema
-from src.auth.service import AuthSrviceDep
+from src.auth.service import AuthServiceDep
 from src.core.config import settings
 
 router = APIRouter(prefix="/auth")
@@ -23,7 +23,7 @@ async def get_csrf_token(csrf_protect: CsrfProtectDep) -> Response:
 
 @router.post("/registration")
 async def registration(
-    service: AuthSrviceDep, credentials: CredentialsSchema
+    service: AuthServiceDep, credentials: CredentialsSchema
 ) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "User created successfully"},
@@ -42,7 +42,9 @@ async def registration(
 
 
 @router.post("/login")
-async def login(service: AuthSrviceDep, credentials: CredentialsSchema) -> JSONResponse:
+async def login(
+    service: AuthServiceDep, credentials: CredentialsSchema
+) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "Logged in successfully"}, status_code=status.HTTP_200_OK
     )
@@ -59,7 +61,7 @@ async def login(service: AuthSrviceDep, credentials: CredentialsSchema) -> JSONR
 
 
 @router.post("/logout")
-async def logout(service: AuthSrviceDep, cookie_session_id: str) -> JSONResponse:
+async def logout(service: AuthServiceDep, cookie_session_id: str) -> JSONResponse:
     response = JSONResponse(
         content={"detail": "Logged out successfully"},
         status_code=status.HTTP_204_NO_CONTENT,
