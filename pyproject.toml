@@ -30,7 +30,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "faker>=40.21.0",
     "pre-commit>=4.6.0",
+    "pytest>=9.0.3",
+    "pytest-asyncio>=1.4.0",
     "ruff>=0.15.10,<0.16",
 ]
 
@@ -69,3 +72,12 @@ unfixable = []
 [tool.ruff.lint.isort]
 known-first-party = ["src"]
 combine-as-imports = true
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+addopts = [
+    "-v",
+]
