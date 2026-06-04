@@ -26,7 +26,7 @@ class AuthSrvice:
     async def register(self, credentials: CredentialsSchema) -> str:
         user = await self.user_repo.create_user(credentials)
         session_id = await self.authenticate(user_model=user)
-        await self.session_repo.create_session(session_id, user.username)
+        await self.session_repo.create_session(session_id, user.username, user)
         await self.redis.set(session_id, user.username)
         logger.info("User registered", session_id=session_id)
         return session_id

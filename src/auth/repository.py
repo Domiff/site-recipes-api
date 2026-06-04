@@ -49,11 +49,12 @@ class AuthUser(BaseAuth):
 
 
 class AuthSession(BaseAuth):
-    async def create_session(self, session_key, session_data) -> Session:
+    async def create_session(self, session_key, session_data, user) -> Session:
         session = Session(
             session_key=session_key,
             session_data=session_data,
             expire_date=expire_at(),
+            user=user,
         )
         self.session.add(session)
         await self.session.commit()
