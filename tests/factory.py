@@ -34,5 +34,5 @@ def make_recipe():
         ingredients=_faker.sentence(),
         steps=_faker.sentence(),
         time_cooking=_faker.sentence(),
-        categories=[_faker.random_number()],
+        categories=[_faker.random_int(min=1, max=5)],
     )
