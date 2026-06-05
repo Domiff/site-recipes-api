@@ -34,10 +34,10 @@ async def get_recipe(
 
 @router.get("/ingredient/{recipe_ingredient}", response_model_exclude_none=True)
 async def get_recipe_with_ingredient(
-    ingredient: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
+    recipe_ingredient: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
 ) -> WithoutTotalCursorPage[RecipeOut]:
     set_page(WithoutTotalCursorPage)
-    query = await repo.get_by_ingredient(ingredient)
+    query = await repo.get_by_ingredient(recipe_ingredient)
     return await apaginate(query=query, conn=repo.session, params=params)
 
 
