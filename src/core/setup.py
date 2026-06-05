@@ -9,6 +9,7 @@ from src.core.config import settings
 from src.core.database import ping_database
 from src.core.errors import setup_errors
 from src.core.logging_app import configure_logging, get_logger
+from src.scripts import prepare_categories
 from src.recipes.router import router as recipes_router
 from src.auth.router import router as auth_router
 
@@ -24,6 +25,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
     }
     logger.info("Starting application", **params)
     logger.info("Application started")
+
+    await prepare_categories()
 
     yield
 
