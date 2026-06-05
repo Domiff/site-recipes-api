@@ -1,13 +1,14 @@
-from typing import Annotated, AsyncGenerator
+from collections.abc import AsyncGenerator
+from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.orm import DeclarativeBase, declared_attr, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, declared_attr, mapped_column
 
 from src.core.config import settings
-from src.core.utils import to_snake_plural
 from src.core.logging_app import get_logger
+from src.core.utils import to_snake_plural
 
 logger = get_logger(__name__)
 
@@ -43,3 +44,8 @@ async def ping_database() -> bool:
     except Exception as e:
         logger.error("Database ping failed", error=str(e))
         return False
+
+
+class BaseRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session

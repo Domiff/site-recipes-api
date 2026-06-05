@@ -8,18 +8,14 @@ from src.auth.models import Session, User
 from src.auth.schemas import CredentialsSchema
 from src.auth.utils import expire_at, hash_password
 from src.core.config import settings
+from src.core.database import BaseRepository
 from src.core.exceptions import AlreadyExists, DoesNotExist
 from src.core.logging_app import get_logger
 
 logger = get_logger(__name__)
 
 
-class BaseAuth:
-    def __init__(self, session: AsyncSession):
-        self.session = session
-
-
-class AuthUser(BaseAuth):
+class UserRepository(BaseRepository):
     async def create(self, credentials: CredentialsSchema) -> User:
         hashed_password = hash_password(credentials.password)
         try:
@@ -47,7 +43,7 @@ class AuthUser(BaseAuth):
             raise DoesNotExist("User not found") from err
 
 
-class AuthSession(BaseAuth):
+class SessionRepository(BaseRepository):
     async def create(self, session_key, session_data, user) -> Session:
         session = Session(
             session_key=session_key,
@@ -80,3 +76,11 @@ class AuthSession(BaseAuth):
         await self.session.commit()
         logger.info("Session updated")
         return True
+
+
+def get_user_repo(session: AsyncSession) -> UserRepository:
+    return UserRepository(session)
+
+
+def get_session_repo(session: AsyncSession) -> SessionRepository:
+    return SessionRepository(session)

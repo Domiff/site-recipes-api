@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
-from src.auth.repository import AuthSession, AuthUser
+from src.auth.repository import get_session_repo, get_user_repo
 from src.auth.service import AuthService, get_auth_service
 from src.core.database import Base, get_session
 from src.core.setup import create_app
@@ -51,12 +51,12 @@ async def session(async_engine):
 
 @pytest.fixture
 def user_repo(session):
-    return AuthUser(session)
+    return get_user_repo(session)
 
 
 @pytest.fixture
 def session_repo(session):
-    return AuthSession(session)
+    return get_session_repo(session)
 
 
 @pytest.fixture

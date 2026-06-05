@@ -4,7 +4,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.models import User
-from src.auth.repository import AuthSession, AuthUser
+from src.auth.repository import get_session_repo, get_user_repo
 from src.auth.schemas import CredentialsSchema, UserSchema
 from src.auth.utils import generate_session_id, verify_password
 from src.core.database import SessionDep
@@ -18,8 +18,8 @@ logger = get_logger(__name__)
 class AuthService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.user_repo = AuthUser(self.session)
-        self.session_repo = AuthSession(self.session)
+        self.user_repo = get_user_repo(self.session)
+        self.session_repo = get_session_repo(self.session)
         self.redis = RedisClient()
 
     async def register(self, credentials: CredentialsSchema) -> str:

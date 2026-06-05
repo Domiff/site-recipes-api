@@ -2,10 +2,9 @@ from typing import Annotated
 
 from fastapi import Depends
 from sqlalchemy import Select, select
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.core.database import SessionDep  # noqa
+from src.core.database import BaseRepository, SessionDep
 from src.core.logging_app import get_logger
 from src.recipes.models import Category, Recipe
 from src.recipes.schemas import RecipeData, RecipeIn
@@ -13,10 +12,7 @@ from src.recipes.schemas import RecipeData, RecipeIn
 logger = get_logger(__name__)
 
 
-class RecipeRepository:
-    def __init__(self, session: AsyncSession) -> None:
-        self.session = session
-
+class RecipeRepository(BaseRepository):
     async def get_all_recipes(self) -> Select:
         return (
             select(Recipe).options(selectinload(Recipe.categories)).order_by(Recipe.id)
