@@ -1,14 +1,15 @@
 from fastapi import APIRouter, Depends
+from fastapi_pagination import set_page
 from fastapi_pagination.ext.sqlalchemy import apaginate
 
-from src.auth.depends import get_current_user  # noqa
+from src.auth.depends import get_current_user
 from src.recipes.repository import RecipeRepoDep
 from src.recipes.schemas import (
     RecipeData,
     RecipeOut,
     WithoutTotalCursorPage,
     WithoutTotalCursorParamsDep,
-)  # noqa
+)
 
 router = APIRouter(prefix="/recipes", dependencies=[Depends(get_current_user)])
 
@@ -17,6 +18,7 @@ router = APIRouter(prefix="/recipes", dependencies=[Depends(get_current_user)])
 async def get_all_recipes(
     repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
 ) -> WithoutTotalCursorPage[RecipeOut]:
+    set_page(WithoutTotalCursorPage)
     query = await repo.get_all()
     return await apaginate(query=query, conn=repo.session, params=params)
 
@@ -25,6 +27,7 @@ async def get_all_recipes(
 async def get_recipe(
     recipe_title: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
 ) -> WithoutTotalCursorPage[RecipeOut]:
+    set_page(WithoutTotalCursorPage)
     query = await repo.get_by_title(recipe_title)
     return await apaginate(query=query, conn=repo.session, params=params)
 
@@ -33,6 +36,7 @@ async def get_recipe(
 async def get_recipe_with_ingredient(
     ingredient: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
 ) -> WithoutTotalCursorPage[RecipeOut]:
+    set_page(WithoutTotalCursorPage)
     query = await repo.get_by_ingredient(ingredient)
     return await apaginate(query=query, conn=repo.session, params=params)
 
