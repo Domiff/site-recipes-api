@@ -2,6 +2,7 @@ from faker import Faker
 
 from src.auth.models import User
 from src.auth.schemas import CredentialsSchema
+from src.recipes.schemas import RecipeIn
 
 _faker = Faker()
 
@@ -23,4 +24,15 @@ def make_user():
         username=_faker.user_name(),
         email=_faker.email(),
         password=_faker.password(),
+    )
+
+
+def make_recipe():
+    return RecipeIn(
+        title=_faker.sentence(),
+        description=_faker.sentence(),
+        ingredients=_faker.sentence(),
+        steps=_faker.sentence(),
+        time_cooking=_faker.sentence(),
+        categories=[_faker.random_number()],
     )

@@ -11,6 +11,7 @@ from src.auth.repository import get_session_repo, get_user_repo
 from src.auth.service import AuthService, get_auth_service
 from src.core.database import Base, get_session
 from src.core.setup import create_app
+from src.recipes.repository import get_recipe_repo
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -57,6 +58,11 @@ def user_repo(session):
 @pytest.fixture
 def session_repo(session):
     return get_session_repo(session)
+
+
+@pytest.fixture
+def recipe_repo(session):
+    return get_recipe_repo(session)
 
 
 @pytest.fixture
