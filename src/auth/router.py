@@ -61,9 +61,8 @@ async def login(
 
 
 @router.post("/logout")
-async def logout(service: AuthServiceDep, cookie_session_id: str) -> JSONResponse:
-    response = JSONResponse(
-        content={"detail": "Logged out successfully"},
+async def logout(service: AuthServiceDep, cookie_session_id: str) -> Response:
+    response = Response(
         status_code=status.HTTP_204_NO_CONTENT,
     )
     await service.logout(cookie_session_id)
