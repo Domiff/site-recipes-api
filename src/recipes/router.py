@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi_pagination import set_page
 from fastapi_pagination.ext.sqlalchemy import apaginate
 
@@ -41,7 +41,7 @@ async def get_recipe_with_ingredient(
     return await apaginate(query=query, conn=repo.session, params=params)
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def add_recipe(data: RecipeData, repo: RecipeRepoDep) -> RecipeOut | None:
     """
     Id category for recipes:
@@ -65,9 +65,6 @@ async def update_recipe(
     return RecipeOut.model_validate(recipe)
 
 
-@router.delete("/delete/{id}")
-async def delete_recipe(id_: int, repo: RecipeRepoDep) -> dict[str, bool | str]:
-    deleted = await repo.delete(id_)
-    if deleted:
-        return {"message": True}
-    return {"error": "Recipe not found"}
+@router.delete("/delete/{id_}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_recipe(id_: int, repo: RecipeRepoDep) -> None:
+    await repo.delete(id_)
