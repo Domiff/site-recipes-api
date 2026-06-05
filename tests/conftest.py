@@ -1,4 +1,5 @@
 import pytest
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import StaticPool
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -7,8 +8,9 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from src.auth.repository import AuthSession, AuthUser
-from src.auth.service import AuthService
-from src.core.database import Base
+from src.auth.service import AuthService, get_auth_service
+from src.core.database import Base, get_session
+from src.core.setup import create_app
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -60,3 +62,11 @@ def session_repo(session):
 @pytest.fixture
 def service(session):
     return AuthService(session)
+
+
+@pytest.fixture
+async def client(session, service):
+    app = create_app()
+    app.dependency_overrides[get_session] = lambda: session
+    app.dependency_overrides[get_auth_service] = lambda: service
+    yield AsyncClient(transport=ASGITransport(app=app), base_url="http://test")

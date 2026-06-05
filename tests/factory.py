@@ -1,5 +1,3 @@
-import uuid
-
 from faker import Faker
 
 from src.auth.models import User
@@ -17,7 +15,7 @@ def make_credentials():
 
 
 def make_session_key():
-    return uuid.uuid4().hex
+    return _faker.uuid7()
 
 
 def make_user():
