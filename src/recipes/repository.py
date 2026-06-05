@@ -13,12 +13,12 @@ logger = get_logger(__name__)
 
 
 class RecipeRepository(BaseRepository):
-    async def get_all_recipes(self) -> Select:
+    async def get_all(self) -> Select:
         return (
             select(Recipe).options(selectinload(Recipe.categories)).order_by(Recipe.id)
         )
 
-    async def get_recipe(self, recipe_title: str) -> Select:
+    async def get_by_title(self, recipe_title: str) -> Select:
         query = (
             select(Recipe)
             .options(selectinload(Recipe.categories))
@@ -27,7 +27,7 @@ class RecipeRepository(BaseRepository):
         )
         return query
 
-    async def get_recipe_with_ingredient(self, ingredient: str) -> Select:
+    async def get_by_ingredient(self, ingredient: str) -> Select:
         query = (
             select(Recipe)
             .options(selectinload(Recipe.categories))
@@ -36,7 +36,7 @@ class RecipeRepository(BaseRepository):
         )
         return query
 
-    async def add_recipe(self, data: RecipeIn) -> Recipe:
+    async def create(self, data: RecipeIn) -> Recipe:
         logger.info("Creating recipe", title=data.title)
         query = select(Category).where(Category.id.in_(data.categories))
         categories = await self.session.execute(query)
@@ -55,7 +55,7 @@ class RecipeRepository(BaseRepository):
         logger.info("Recipe created", recipe_id=recipe.id)
         return recipe
 
-    async def update_recipe(self, id_: int, data: RecipeData) -> Recipe | None:
+    async def update(self, id_: int, data: RecipeData) -> Recipe | None:
         logger.info("Updating recipe", recipe_id=id_)
         query = (
             select(Recipe)
@@ -85,7 +85,7 @@ class RecipeRepository(BaseRepository):
         logger.info("Recipe updated", recipe_id=id_)
         return recipe
 
-    async def delete_recipe(self, id_: int) -> bool:
+    async def delete(self, id_: int) -> bool:
         logger.info("Deleting recipe", recipe_id=id_)
         query = select(Recipe).where(Recipe.id == id_)
         recipe = (await self.session.execute(query)).scalar()

@@ -10,17 +10,14 @@ from src.recipes.schemas import (
     WithoutTotalCursorParamsDep,
 )  # noqa
 
-router = APIRouter(
-    prefix="/recipes",
-    dependencies=[Depends(get_current_user)]
-)
+router = APIRouter(prefix="/recipes", dependencies=[Depends(get_current_user)])
 
 
 @router.get("/", response_model_exclude_none=True)
 async def get_all_recipes(
     repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
 ) -> WithoutTotalCursorPage[RecipeOut]:
-    query = await repo.get_all_recipes()
+    query = await repo.get_all()
     return await apaginate(query=query, conn=repo.session, params=params)
 
 
@@ -28,7 +25,7 @@ async def get_all_recipes(
 async def get_recipe(
     recipe_title: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
 ) -> WithoutTotalCursorPage[RecipeOut]:
-    query = await repo.get_recipe(recipe_title)
+    query = await repo.get_by_title(recipe_title)
     return await apaginate(query=query, conn=repo.session, params=params)
 
 
@@ -36,7 +33,7 @@ async def get_recipe(
 async def get_recipe_with_ingredient(
     ingredient: str, repo: RecipeRepoDep, params: WithoutTotalCursorParamsDep
 ) -> WithoutTotalCursorPage[RecipeOut]:
-    query = await repo.get_recipe_with_ingredient(ingredient)
+    query = await repo.get_by_ingredient(ingredient)
     return await apaginate(query=query, conn=repo.session, params=params)
 
 
@@ -50,7 +47,7 @@ async def add_recipe(data: RecipeData, repo: RecipeRepoDep) -> RecipeOut | None:
     4 - Напиток
     5 - Суп
     """
-    recipe = await repo.add_recipe(data)
+    recipe = await repo.create(data)
     return RecipeOut.model_validate(recipe)
 
 
@@ -58,7 +55,7 @@ async def add_recipe(data: RecipeData, repo: RecipeRepoDep) -> RecipeOut | None:
 async def update_recipe(
     id_: int, data: RecipeData, repo: RecipeRepoDep
 ) -> RecipeOut | str:
-    recipe = await repo.update_recipe(id_, data)
+    recipe = await repo.update(id_, data)
     if not recipe:
         return "Recipe not found"
     return RecipeOut.model_validate(recipe)
@@ -66,7 +63,7 @@ async def update_recipe(
 
 @router.delete("/delete/{id}")
 async def delete_recipe(id_: int, repo: RecipeRepoDep) -> dict[str, bool | str]:
-    deleted = await repo.delete_recipe(id_)
+    deleted = await repo.delete(id_)
     if deleted:
         return {"message": True}
     return {"error": "Recipe not found"}
