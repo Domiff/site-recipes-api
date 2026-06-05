@@ -60,13 +60,13 @@ def session_repo(session):
 
 
 @pytest.fixture
-def service(session):
+def auth_service(session):
     return AuthService(session)
 
 
 @pytest.fixture
-async def client(session, service):
+async def client(session, auth_service):
     app = create_app()
     app.dependency_overrides[get_session] = lambda: session
-    app.dependency_overrides[get_auth_service] = lambda: service
+    app.dependency_overrides[get_auth_service] = lambda: auth_service
     yield AsyncClient(transport=ASGITransport(app=app), base_url="http://test")
