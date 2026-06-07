@@ -1,8 +1,8 @@
 import logging
 import os
 import sys
-from typing import Any
 from logging.handlers import RotatingFileHandler
+from typing import Any
 
 import structlog
 from pythonjsonlogger.json import JsonFormatter
@@ -12,10 +12,8 @@ from src.core.config import BASE_DIR, settings
 LOG_LEVEL = "DEBUG" if settings.app.IS_DEBUG else "INFO"
 
 
-def sanitize_for_logging(data: Any) -> Any:
-    if not isinstance(data, dict):
-        return data
-    sensitive_names = {
+def sanitize_processor(_, __, event_dict: dict[str, Any]):
+    sensitive_fields = {
         "password",
         "token",
         "authorization",
@@ -23,19 +21,17 @@ def sanitize_for_logging(data: Any) -> Any:
         "secret",
         "key",
     }
-    redacted: dict[str, Any] = {}
-    for k, v in data.items():
-        if any(sensitive_name in k.lower() for sensitive_name in sensitive_names):
-            redacted[k] = "***SENSITIVE***"
-        elif isinstance(v, dict):
-            redacted[k] = sanitize_for_logging(v)
-        else:
-            redacted[k] = v
-    return redacted
+
+    for key in list(event_dict.keys()):
+        if any(field in key.lower() for field in sensitive_fields):
+            event_dict[key] = "***SENSITIVE***"
+
+    return event_dict
 
 
 def configure_logging() -> None:
     processors = [
+        sanitize_processor,
         structlog.stdlib.add_log_level,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.format_exc_info,
