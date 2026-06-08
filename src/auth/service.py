@@ -10,7 +10,7 @@ from src.auth.utils import generate_session_id, verify_password
 from src.core.database import SessionDep
 from src.core.exceptions import IncorrectCredentials
 from src.core.logging_app import get_logger
-from src.core.redis import RedisClient
+from src.core.redis import get_redis
 
 logger = get_logger(__name__)
 
@@ -20,7 +20,7 @@ class AuthService:
         self.session = session
         self.user_repo = get_user_repo(self.session)
         self.session_repo = get_session_repo(self.session)
-        self.redis = RedisClient()
+        self.redis = get_redis()
 
     async def register(self, credentials: CredentialsSchema) -> str:
         user = await self.user_repo.create(credentials)

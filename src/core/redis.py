@@ -9,12 +9,11 @@ from redis.exceptions import (
 from src.core.config import settings
 from src.core.logging_app import get_logger
 
-
 logger = get_logger(__name__)
 
 
 @lru_cache
-def get_redis() -> Redis:
+def _get_redis() -> Redis:
     return Redis.from_url(
         url=settings.redis.REDIS_URL,
         max_connections=settings.redis.CONNECTION_POOL_MAXSIZE,
@@ -24,7 +23,7 @@ def get_redis() -> Redis:
 
 class RedisClient:
     def __init__(self):
-        self.redis = get_redis()
+        self.redis = _get_redis()
 
     async def set(self, key: str, value) -> None:
         try:
@@ -73,3 +72,7 @@ class RedisClient:
         except Exception as e:
             logger.error("Redis delete operation failed", key=key, error=str(e))
             raise
+
+
+def get_redis() -> RedisClient:
+    return RedisClient()
