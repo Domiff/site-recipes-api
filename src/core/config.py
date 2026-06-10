@@ -28,12 +28,16 @@ class DBSettings(AppSettings):
     POSTGRES_PORT: int = 5432
 
     def get_pg_url(self) -> str:
-        return (f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
-                f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}")
+        return (
+            f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
 
     def model_post_init(self, __context) -> None:
-        object.__setattr__(self,
-            "DB_URL", self.get_pg_url() if self.IS_DOCKERIZED else self.SQLITE_URL,
+        object.__setattr__(
+            self,
+            "DB_URL",
+            self.get_pg_url() if self.IS_DOCKERIZED else self.SQLITE_URL,
         )
 
 
@@ -44,6 +48,7 @@ class SessionSettings(AppSettings):
     COOKIE_SECURE: bool = True
     HTTPONLY: bool = True
     SESSION_MAX_AGE: int = 60 * 60 * 24 * 14
+    SESSION_ID: str = "session_id"
 
 
 class RedisSettings(AppSettings):
@@ -70,12 +75,11 @@ class GunicornSettings(AppSettings):
     TIMEOUT: int = 900
 
     def model_post_init(self, __context) -> None:
-        object.__setattr__(
-            self, "WORKERS", 1 if self.IS_DEBUG else 4
-        )
+        object.__setattr__(self, "WORKERS", 1 if self.IS_DEBUG else 4)
         object.__setattr__(
             self,
-            "LOG_LEVEL", "DEBUG" if self.IS_DEBUG else "INFO",
+            "LOG_LEVEL",
+            "DEBUG" if self.IS_DEBUG else "INFO",
         )
 
 

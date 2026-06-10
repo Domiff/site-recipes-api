@@ -31,7 +31,7 @@ async def registration(
     )
     session_id = await service.register(credentials)
     response.set_cookie(
-        key="session_id",
+        key=settings.session.SESSION_ID,
         value=session_id,
         httponly=True,
         max_age=settings.session.SESSION_MAX_AGE,
@@ -50,7 +50,7 @@ async def login(
     )
     session_id = await service.login(credentials)
     response.set_cookie(
-        key="session_id",
+        key=settings.session.SESSION_ID,
         value=session_id,
         httponly=True,
         max_age=settings.session.SESSION_MAX_AGE,
@@ -66,5 +66,5 @@ async def logout(service: AuthServiceDep, cookie_session_id: str) -> Response:
         status_code=status.HTTP_204_NO_CONTENT,
     )
     await service.logout(cookie_session_id)
-    response.delete_cookie("session_id")
+    response.delete_cookie(settings.session.SESSION_ID)
     return response
